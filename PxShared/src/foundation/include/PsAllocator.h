@@ -37,7 +37,11 @@
 
 #if(PX_WINDOWS_FAMILY || PX_XBOXONE)
 #include <exception>
+#if defined(_MSC_VER) && _MSC_VER < 1900
 #include <typeinfo.h>
+#else
+#include <typeinfo>
+#endif
 #endif
 #if(PX_APPLE_FAMILY)
 #include <typeinfo>
