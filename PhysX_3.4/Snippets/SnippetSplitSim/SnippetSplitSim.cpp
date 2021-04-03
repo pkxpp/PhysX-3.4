@@ -247,6 +247,7 @@ void updateKinematics(PxReal timeStep)
 
 			PxRigidDynamic* kine = gKinematics[y][x];
 			kine->setKinematicTarget(motion);
+			//kine->setGlobalPose(motion);
 		}
 	}
 }

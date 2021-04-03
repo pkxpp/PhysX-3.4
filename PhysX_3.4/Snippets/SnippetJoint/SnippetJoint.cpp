@@ -87,6 +87,7 @@ PxJoint* createBreakableFixed(PxRigidActor* a0, const PxTransform& t0, PxRigidAc
 	j->setBreakForce(1000, 100000);	
 	j->setConstraintFlag(PxConstraintFlag::eDRIVE_LIMITS_ARE_FORCES, true);
 	j->setConstraintFlag(PxConstraintFlag::eDISABLE_PREPROCESSING, true);
+	j->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
 	return j;
 }
 
@@ -98,6 +99,7 @@ PxJoint* createDampedD6(PxRigidActor* a0, const PxTransform& t0, PxRigidActor* a
 	j->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
 	j->setMotion(PxD6Axis::eTWIST, PxD6Motion::eFREE);
 	j->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0, 1000, FLT_MAX, true));
+	j->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
 	return j;
 }
 

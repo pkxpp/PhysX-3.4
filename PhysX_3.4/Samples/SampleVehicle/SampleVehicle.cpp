@@ -73,7 +73,8 @@ static PxTransform gPlayerCarStartTransforms[NUM_PLAYER_CARS] =
 	PxTransform(PxVec3(-154.699753f, 9.863837f, 87.684113f), PxQuat(-0.000555f, -0.267015, 0.000155, -0.963692 ))
 };
 
-#define NUM_NONPLAYER_4W_VEHICLES 7
+//#define NUM_NONPLAYER_4W_VEHICLES 7
+#define NUM_NONPLAYER_4W_VEHICLES 0
 #if NUM_NONPLAYER_4W_VEHICLES
 static PxTransform gVehicle4WStartTransforms[NUM_NONPLAYER_4W_VEHICLES] = 
 {
@@ -94,7 +95,7 @@ static PxTransform gVehicle4WStartTransforms[NUM_NONPLAYER_4W_VEHICLES] =
 };
 #endif
 
-#define NUM_NONPLAYER_6W_VEHICLES 1
+#define NUM_NONPLAYER_6W_VEHICLES 0
 #if NUM_NONPLAYER_6W_VEHICLES
 static PxTransform gVehicle6WStartTransforms[NUM_NONPLAYER_6W_VEHICLES]=
 {
@@ -402,7 +403,7 @@ void SampleVehicle::onInit()
 	createStandardMaterials();	
 	createVehicles();
 	createTrack(mTerrainSize, mTerrainWidth, mTerrainSize*4.0f);
-	createObstacles();	
+	//createObstacles();	
 
 	//Setup camera.
 	setCameraController(NULL);
@@ -662,7 +663,11 @@ void SampleVehicle::onTickPreRender(PxF32 dtime)
 		{
 			//The transform of this car component has been computed by the vehicle physics
 			//and stored in the composite bound of the car (chassis + wheels).	
-			actor->setTransform(PxShapeExt::getGlobalPose(*carShapes[carPart], vehicleActor));
+			PxTransform shapeT = carShapes[carPart]->getLocalPose();
+			PxTransform actorT = vehicleActor.getGlobalPose();
+			PxTransform testT1 = actorT * shapeT;
+			PxTransform testT = PxShapeExt::getGlobalPose(*carShapes[carPart], vehicleActor);
+			actor->setTransform(testT);
 
 			//update bounds of render actor, for camera cull
 			actor->setWorldBounds(PxShapeExt::getWorldBounds(*carShapes[carPart], vehicleActor));
@@ -2203,7 +2208,7 @@ void SampleVehicle::updateVehicleManager(const PxF32 dtime, const PxVec3& gravit
 	{
 	case ePLAYER_VEHICLE_TYPE_VEHICLE4W:
 	case ePLAYER_VEHICLE_TYPE_TANK4W:
-#if PX_DEBUG_VEHICLE_ON
+#if false/*PX_DEBUG_VEHICLE_ON*/
 		mVehicleManager.updateAndRecordTelemetryData(dtime,gravity,mVehicleManager.getVehicle(mPlayerVehicle),mTelemetryData4W);
 #else
 		mVehicleManager.update(dtime,gravity);
@@ -2211,7 +2216,7 @@ void SampleVehicle::updateVehicleManager(const PxF32 dtime, const PxVec3& gravit
 		break;
 	case ePLAYER_VEHICLE_TYPE_VEHICLE6W:
 	case ePLAYER_VEHICLE_TYPE_TANK6W:
-#if PX_DEBUG_VEHICLE_ON
+#if false/*PX_DEBUG_VEHICLE_ON*/
 		mVehicleManager.updateAndRecordTelemetryData(dtime,gravity,mVehicleManager.getVehicle(mPlayerVehicle),mTelemetryData6W);
 #else
 		mVehicleManager.update(dtime,gravity);

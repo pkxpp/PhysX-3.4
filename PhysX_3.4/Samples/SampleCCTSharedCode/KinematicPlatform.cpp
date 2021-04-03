@@ -267,4 +267,5 @@ void KinematicPlatformManager::updatePhysicsPlatforms(float dtime)
 	const size_t nbPlatforms = mPlatforms.size();
 	for(PxU32 i=0;i<nbPlatforms;i++)
 		mPlatforms[i]->updatePhysics(dtime);
+	//mPlatforms[3]->updatePhysics(dtime);
 }

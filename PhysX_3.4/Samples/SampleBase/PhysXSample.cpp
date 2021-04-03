@@ -187,7 +187,7 @@ const char* PhysXSample::getSampleOutputFilePath(const char* inFilePath, const c
 	
 	const char* inFilename = getFilenameFromPath(inFilePath, sBuffer);
 	sprintf(tmpBuffer, "cached/%s%s", inFilename, outExtension);
-	return getSampleOutputDirManager().getFilePath(tmpBuffer, sBuffer, false);	
+	return getSampleOutputDirManager().getFilePath(tmpBuffer, sBuffer, false);
 }
 
 static void GenerateCirclePts(unsigned int nb, PxVec3* pts, float scale, float z)
@@ -922,6 +922,7 @@ void PhysXSample::onInit()
 
 	// setup default material...
 	mMaterial = mPhysics->createMaterial(0.5f, 0.5f, 0.1f);
+	//mMaterial = mPhysics->createMaterial(0.f, 0.f, 0.f);
 	if(!mMaterial)
 		fatalError("createMaterial failed!");
 
@@ -1013,7 +1014,8 @@ void PhysXSample::onInit()
 	PX_ASSERT(NULL == mScene);
 
 	PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	float fTest = -9.81f * 1;
+	sceneDesc.gravity = PxVec3(0.0f, fTest, 0.0f);
 	getDefaultSceneDesc(sceneDesc);
 	
 	
@@ -2626,10 +2628,15 @@ PxRigidDynamic* PhysXSample::createBox(const PxVec3& pos, const PxVec3& dims, co
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+static const PxF32 restitutions[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+static const PxF32 staticFrictions[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+static const PxF32 dynamicFrictions[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 PxRigidDynamic* PhysXSample::createSphere(const PxVec3& pos, PxReal radius, const PxVec3* linVel, RenderMaterial* material, PxReal density)
 {
 	PxSceneWriteLock scopedLock(*mScene);
+	int nIndex = 3;
+	PxMaterial* pPxMaterial = getPhysics().createMaterial(staticFrictions[nIndex], dynamicFrictions[nIndex], restitutions[nIndex]);
 	PxRigidDynamic* sphere = PxCreateDynamic(*mPhysics, PxTransform(pos), PxSphereGeometry(radius), *mMaterial, density);
 	PX_ASSERT(sphere);
 

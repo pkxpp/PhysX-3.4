@@ -57,6 +57,7 @@ static PxQueryHitType::Enum SampleVehicleWheelRaycastPreFilter(
 	PX_UNUSED(constantBlockSize);
 	PX_UNUSED(constantBlock);
 	PX_UNUSED(filterData0);
+	bool bRet = (0 == (filterData1.word3 & SAMPLEVEHICLE_DRIVABLE_SURFACE));
 	return ((0 == (filterData1.word3 & SAMPLEVEHICLE_DRIVABLE_SURFACE)) ? PxQueryHitType::eNONE : PxQueryHitType::eBLOCK);
 }
 

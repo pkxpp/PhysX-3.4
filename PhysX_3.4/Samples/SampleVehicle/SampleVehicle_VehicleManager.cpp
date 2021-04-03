@@ -45,6 +45,7 @@
 #include "geometry/PxConvexMesh.h"
 #include "geometry/PxConvexMeshGeometry.h"
 #include "SampleAllocatorSDKClasses.h"
+#include "PsMathUtils.h"
 
 ///////////////////////////////////
 
@@ -76,6 +77,7 @@ void SampleVehicle_VehicleManager::init(PxPhysics& physics, const PxMaterial** d
 
 	//Set the vehicle update mode to be immediate velocity changes.
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
+	//PxVehicleSetUpdateMode(PxVehicleUpdateMode::eACCELERATION);
 	
 	//Initialise all vehicle ptrs to null.
 	for(PxU32 i=0;i<MAX_NUM_4W_VEHICLES+MAX_NUM_6W_VEHICLES;i++)
@@ -190,7 +192,7 @@ void SampleVehicle_VehicleManager::suspensionRaycasts(PxScene* scene)
 }
 
 
-#if PX_DEBUG_VEHICLE_ON
+#if false/*PX_DEBUG_VEHICLE_ON*/
 
 void SampleVehicle_VehicleManager::updateAndRecordTelemetryData
 (const PxF32 timestep, const PxVec3& gravity, PxVehicleWheels* focusVehicle, PxVehicleTelemetryData* telemetryData)
@@ -304,6 +306,14 @@ void setupActor
 	vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset,PxQuat(PxIdentity)));
 }
 
+inline PxQuat EulerAngleToQuat(const PxVec3 &rot)
+{
+	PxQuat qx(Ps::degToRad(rot.x), PxVec3(1.0f, 0.0f, 0.0f));
+	PxQuat qy(Ps::degToRad(rot.y), PxVec3(0.0f, 1.0f, 0.0f));
+	PxQuat qz(Ps::degToRad(rot.z), PxVec3(0.0f, 0.0f, 1.0f));
+	return qz * qy * qx;
+}
+
 PxRigidDynamic* createVehicleActor4W
 (const PxVehicleChassisData& chassisData,
  PxConvexMesh** wheelConvexMeshes, PxConvexMesh* chassisConvexMesh, 
@@ -313,13 +323,23 @@ PxRigidDynamic* createVehicleActor4W
 	//Don't forget to add the actor the scene after setting up the associated vehicle.
 	PxRigidDynamic* vehActor=physics.createRigidDynamic(PxTransform(PxIdentity));
 
+	// test
+	PxQuat r1 = EulerAngleToQuat(PxVec3(0.0f, 90.f, 0.0f));
+	PxMeshScale scaleTest(PxVec3(1.0f, 1.0f, 1.0f), PxQuat(PxPi*0.5f, PxVec3(0, 1, 0)));
+	// test end
 	//We need to add wheel collision shapes, their local poses, a material for the wheels, and a simulation filter for the wheels.
-	PxConvexMeshGeometry frontLeftWheelGeom(wheelConvexMeshes[0]);
+	PxConvexMeshGeometry frontLeftWheelGeom(wheelConvexMeshes[0], scaleTest);
 	PxConvexMeshGeometry frontRightWheelGeom(wheelConvexMeshes[1]);
 	PxConvexMeshGeometry rearLeftWheelGeom(wheelConvexMeshes[2]);
 	PxConvexMeshGeometry rearRightWheelGeom(wheelConvexMeshes[3]);
 	const PxGeometry* wheelGeometries[4]={&frontLeftWheelGeom,&frontRightWheelGeom,&rearLeftWheelGeom,&rearRightWheelGeom};
-	const PxTransform wheelLocalPoses[4]={PxTransform(PxIdentity),PxTransform(PxIdentity),PxTransform(PxIdentity),PxTransform(PxIdentity)};
+	PxTransform wheelLocalPoses[4]={PxTransform(PxIdentity),PxTransform(PxIdentity),PxTransform(PxIdentity),PxTransform(PxIdentity)};
+	// test
+	//XMVECTOR v = XMQuaternionRotationRollPitchYaw(XM_PI / 2.f, 0.0f, 0.0f);
+	PxQuat r = EulerAngleToQuat(PxVec3(PxPi / 2.0f, 0.0f, 0.0f));
+	wheelLocalPoses[0] = PxTransform(PxVec3(1.0f, 0.f, 0.f), r);
+	// test end
+
 	const PxMaterial& wheelMaterial=material;
 	PxFilterData wheelCollFilterData;
 	wheelCollFilterData.word0=COLLISION_FLAG_WHEEL;
@@ -581,9 +601,26 @@ void SampleVehicle_VehicleManager::create4WVehicle
 	//Instantiate and finalize the vehicle using physx.
 	PxRigidDynamic* vehActor=createVehicleActor4W(chassisData,wheelConvexMeshes4,chassisConvexMesh,scene,physics,material);
 
+	// test
+	const physx::PxTolerancesScale& ToleramcesScale = physics.getTolerancesScale();
+	vehActor->setLinearDamping(0.3f);
+	vehActor->setAngularDamping(0.3f);
+	vehActor->setSleepThreshold(5e-5f * ToleramcesScale.speed * ToleramcesScale.speed);
+	// test end
+
 	//Create a car.
 	PxVehicleDrive4W* car = PxVehicleDrive4W::allocate(4);
 	car->setup(&physics,vehActor,*wheelsSimData,driveSimData,0);
+
+	// test
+	vehActor->getNbShapes();
+	PxShape* carShapes[PX_MAX_NB_WHEELS + 1];
+	const PxU32 numShapes = vehActor->getNbShapes();
+	vehActor->getShapes(carShapes, numShapes);
+
+	PxQuat r = EulerAngleToQuat(PxVec3(0.0f, PxPi / 2.0f, 0.0f));
+	carShapes[0]->setLocalPose(PxTransform(PxVec3(1.0f, 0.f, 0.f), r));
+	// test end
 
 	//Free the sim data because we don't need that any more.
 	wheelsSimData->free();

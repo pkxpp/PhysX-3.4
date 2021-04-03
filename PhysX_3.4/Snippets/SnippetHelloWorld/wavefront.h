@@ -27,36 +27,26 @@
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
+#ifndef WAVEFRONT_OBJ_H
+#define WAVEFRONT_OBJ_H
 
-#ifndef PHYSX_SNIPPET_RENDER_H
-#define PHYSX_SNIPPET_RENDER_H
-
-#include "PxPhysicsAPI.h"
-#include "foundation/PxPreprocessor.h"
-
-#if PX_WINDOWS
-#include <windows.h>
-#pragma warning(disable: 4505)
-#include <glut.h>
-#elif PX_LINUX_FAMILY
-#include <GL/glut.h>
-#elif PX_OSX
-#include <GLUT/glut.h>
-#else
-#error platform not supported.
-#endif
-
-void renderGeometry(const physx::PxGeometryHolder& h);
-namespace Snippets
+class WavefrontObj
 {
-void setupDefaultWindow(const char* name);
-void setupDefaultRenderState();
+public:
 
-void startRender(const physx::PxVec3& cameraEye, const physx::PxVec3& cameraDir, physx::PxReal nearClip = 1.f, physx::PxReal farClip = 10000.f);
-void renderActors(physx::PxRigidActor** actors, const physx::PxU32 numActors, bool shadows = false, const physx::PxVec3 & color = physx::PxVec3(0.0f, 0.75f, 0.0f));
-void finishRender();
-}
+	WavefrontObj(void);
+	~WavefrontObj(void);
 
-#define MAX_NUM_ACTOR_SHAPES 128
+	unsigned int loadObj(const char *fname, bool textured); // load a wavefront obj returns number of triangles that were loaded.  Data is persists until the class is destructed.
 
-#endif //PHYSX_SNIPPET_RENDER_H
+	int mVertexCount;
+	int mTriCount;
+	int* mIndices;
+	float* mVertices;
+	float* mTexCoords;
+};
+
+	bool LoadWavefrontBinary(const char* filename, WavefrontObj& wfo);
+	bool SaveWavefrontBinary(const char* filename, const WavefrontObj& wfo);
+
+#endif

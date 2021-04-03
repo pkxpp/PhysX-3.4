@@ -75,7 +75,7 @@
       <AdditionalIncludeDirectories>./../../SampleBase;./../../PxToolkit/include;./../../SampleFramework/framework/include;./../../SampleFramework/renderer/include;./../../SampleFramework/platform/include;./../../../Include;./../../../Source/Common/include;./../../../Source/Common/src;./../../../Source/GeomUtils/headers;./../../../Source/GeomUtils/include;./../../../Source/GeomUtils/src/contact;./../../../Source/GeomUtils/src/common;./../../../Source/GeomUtils/src/convex;./../../../Source/GeomUtils/src/distance;./../../../Source/GeomUtils/src/gjk;./../../../Source/GeomUtils/src/intersection;./../../../Source/GeomUtils/src/mesh;./../../../Source/GeomUtils/src/Ice;./../../../Source/GeomUtils/src/hf;./../../../Source/GeomUtils/src/pcm;./../../../../PxShared/include;./../../../../PxShared/src/foundation/include;./../../../../PxShared/src/fastxml/include;./../../../Include/common;./../../SampleCCTSharedCode;./../../../Source/PhysXVehicle/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_HAS_EXCEPTIONS=0;WIN32;WIN64;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;PHYSX_PROFILE_SDK;_DEBUG;PX_DEBUG=1;PX_CHECKED=1;PX_NVTX=1;PX_SUPPORT_PVD=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>

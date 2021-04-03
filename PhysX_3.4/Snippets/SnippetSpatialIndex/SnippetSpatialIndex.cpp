@@ -98,11 +98,17 @@ struct Sphere : public PxSpatialIndexItem
 
 Sphere					gSpheres[SPHERE_COUNT];
 PxSpatialIndex*			gBvh;
+PxPvd*					gPvd;
 
+#define PVD_HOST "127.0.0.1"
 void init()
 {
 	gFoundation = PxCreateFoundation(PX_FOUNDATION_VERSION, gAllocator, gErrorCallback);
 	gBvh = PxCreateSpatialIndex();
+
+	//gPvd = PxCreatePvd(*gFoundation);
+	//PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	//gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
 	// insert the spheres into the BVH, recording the ID so we can later update them
 	for(PxU32 i=0;i<SPHERE_COUNT;i++)

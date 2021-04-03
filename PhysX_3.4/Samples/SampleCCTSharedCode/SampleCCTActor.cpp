@@ -203,6 +203,11 @@ PxController* ControlledActor::init(const ControlledActorDesc& desc, PxControlle
 				mRenderActorCrouching = SAMPLE_NEW(RenderCapsuleActor)(*renderer, radius, crouchHeight*0.5f);
 			}
 		}
+		// test
+		//actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+		//actor->setActorFlags(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		// test end
 	}
 
 	mController = ctrl;

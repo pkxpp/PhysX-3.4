@@ -155,6 +155,13 @@ PxRigidDynamic* createVehicleActor
 	vehActor->setMassSpaceInertiaTensor(chassisData.mMOI);
 	vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset,PxQuat(PxIdentity)));
 
+	// test
+	//const physx::PxTolerancesScale& ToleramcesScale = physics.getTolerancesScale();
+	//vehActor->setLinearDamping(0.3f);
+	//vehActor->setAngularDamping(0.3f);
+	//vehActor->setSleepThreshold(5e-5f * ToleramcesScale.speed * ToleramcesScale.speed);
+	// test end
+
 	return vehActor;
 }
 

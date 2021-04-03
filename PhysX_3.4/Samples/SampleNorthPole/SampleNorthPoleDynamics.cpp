@@ -154,6 +154,7 @@ PxRigidDynamic* SampleNorthPole::throwBall()
 void SampleNorthPole::createSnowMen()
 {
 	PxU32 numSnowmen = NUM_SNOWMEN; // can't have NUM_SNOWMEN in the loop since setting to 0 causes compiler warnings
+	numSnowmen = 2;
 	for(PxU32 i=0; i<numSnowmen; i++)
 	{	
 		PxVec3 pos(0,1,-8);

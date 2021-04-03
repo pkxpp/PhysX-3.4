@@ -148,18 +148,18 @@ DriveMode gDriveModeOrder[] =
 	eDRIVE_MODE_ACCEL_FORWARDS,
 	eDRIVE_MODE_BRAKE,
 	eDRIVE_MODE_ACCEL_REVERSE,
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_HARD_TURN_LEFT, 
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_HARD_TURN_RIGHT,
-	eDRIVE_MODE_ACCEL_FORWARDS,
-	eDRIVE_MODE_HANDBRAKE_TURN_LEFT,
-	eDRIVE_MODE_ACCEL_FORWARDS,
-	eDRIVE_MODE_HANDBRAKE_TURN_RIGHT,
+	//eDRIVE_MODE_BRAKE,
+	//eDRIVE_MODE_HARD_TURN_LEFT, 
+	//eDRIVE_MODE_BRAKE,
+	//eDRIVE_MODE_HARD_TURN_RIGHT,
+	//eDRIVE_MODE_ACCEL_FORWARDS,
+	//eDRIVE_MODE_HANDBRAKE_TURN_LEFT,
+	//eDRIVE_MODE_ACCEL_FORWARDS,
+	//eDRIVE_MODE_HANDBRAKE_TURN_RIGHT,
 	eDRIVE_MODE_NONE
 };
 
-PxF32					gVehicleModeLifetime = 4.0f;
+PxF32					gVehicleModeLifetime = 1.0f;
 PxF32					gVehicleModeTimer = 0.0f;
 PxU32					gVehicleOrderProgress = 0;
 bool					gVehicleOrderComplete = false;
@@ -344,7 +344,7 @@ void initPhysics()
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = gPhysics->createMaterial(1.0f, 1.0f, 0.6f);
 
 	gCooking = 	PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));	
 
