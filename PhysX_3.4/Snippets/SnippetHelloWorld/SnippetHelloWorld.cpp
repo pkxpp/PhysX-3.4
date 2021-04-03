@@ -23,7 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2018 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2019 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -41,6 +41,9 @@
 #include "../SnippetCommon/SnippetPrint.h"
 #include "../SnippetCommon/SnippetPVD.h"
 #include "../SnippetUtils/SnippetUtils.h"
+#include "geometry/PxGeometryQuery.h"
+#include "../PhysXCallback.h"
+#include <vector>
 
 
 using namespace physx;
@@ -61,6 +64,8 @@ PxPvd*                  gPvd        = NULL;
 // test
 PxRigidDynamic*			gPlane		= NULL;
 PxCooking*				gCooking = NULL;
+PxRigidStatic*			gStaticOut	= NULL;
+PxRigidStatic*			gStaticIn	= NULL;
 // test end
 
 PxReal stackZ = 10.0f;
@@ -113,6 +118,131 @@ PxRigidDynamic* createDynamic(const PxTransform& t, const PxGeometry& geometry, 
 	//	applyDamage(hit.block.position, hit.block.normal);
 
 
+	if (false)
+	{
+	//gScene->addActor(*dynamic);
+
+	// test
+	//PxRaycastHit hitInfo;
+	//PxU32 maxHits = 1;
+	//PxVec3 unitDir = velocity;
+	//PxHitFlags hitFlags = PxHitFlag::ePOSITION | PxHitFlag::eNORMAL | PxHitFlag::eDISTANCE | PxHitFlag::eUV;
+	//PxSphereGeometry geom = PxSphereGeometry(10);
+	////PxTransform pose(PxVec3(0.0f, 1.0f, 50.0f));
+	//PxTransform pose = t;
+	//pose.p += unitDir;
+	//PxReal maxDist = 100.0f;
+	//PxU32 hitCount = 0;
+	//hitCount = PxGeometryQuery::raycast(t.p, unitDir,
+	//	geom, pose,
+	//	maxDist,
+	//	hitFlags,
+	//	maxHits, &hitInfo);
+
+	bool status = false;
+	PxVec3 origin = t.p;                 // [in] Ray origin
+	PxVec3 unitDir = velocity.getNormalized();                // [in] Normalized ray direction
+	//unitDir = PxVec3(0.0f, 0.0f, 1.0f);
+	//PxReal maxDistance = 1000.0f;          // [in] Raycast max distance
+	PxRaycastBuffer hit;                 // [out] Raycast results
+
+										 // Raycast against all static & dynamic objects (no filtering)
+										 // The main result from this call is the closest hit, stored in the 'hit.block' structure
+	//status = gScene->raycast(origin, unitDir, maxDistance, hit);
+
+	PxSweepHit hitSweepTouch[64];
+	PxSweepBuffer hitSweep(hitSweepTouch, 64);
+	PxSphereGeometry sweepShape = PxSphereGeometry(100);
+	PxHitFlags hitFlags = PxHitFlags(PxHitFlag::eDEFAULT);
+	PxQueryFilterData filterData = PxQueryFilterData(PxQueryFlag::eSTATIC);
+	status = gScene->sweep(sweepShape, t, unitDir, PxReal(0.0f), hitSweep, hitFlags, filterData);
+	//bool bInitOverlap = hitSweep.block.hadInitialOverlap();
+	//{
+	//	printf("hitSweep.hasBlock = %s\n", hitSweep.hasBlock ? "true" : "false");
+	//	printf("hitSweep.block.hadInitialOverlap() = %s\n", bInitOverlap ? "true" : "false");
+	//}
+
+	PxOverlapBuffer hitOverlap;            // [out] Overlap results
+	PxSphereGeometry overlapShape = PxSphereGeometry(50);
+	//status = gScene->overlap(overlapShape, t, hitOverlap);
+
+	//if (status)
+	//	applyDamage(hit.block.position, hit.block.normal);
+
+	PxOverlapHit hitOverlapTouch[64];
+	//PhysXOverlapCallback overlapCallback(&(hitOverlapTouch[0]), 64);
+	PxOverlapBuffer overlapBuffer(&(hitOverlapTouch[0]), 64);
+	if (false && gStaticIn) {
+		//PxShape* shape = gPhysics->createShape(PxBoxGeometry(3, 3, 3), *gMaterial);
+		//PxGeometryHolder h = shape->getGeometry();
+		//PxTransform t1 = PxTransform(PxVec3(0, 10, stackZ = 10.0f));
+		//status = gScene->overlap(h.any(), t1, overlapBuffer);
+
+		// Ð¡·½¿éµ±×ögeometry
+		PxTransform tIn = gStaticIn->getGlobalPose();
+		int nShapes = gStaticIn->getNbShapes();
+		PxShape* shapes[1];
+		gStaticIn->getShapes(shapes, nShapes);
+		PxGeometryHolder hIn = shapes[0]->getGeometry();
+		status = gScene->overlap(hIn.any(), tIn, overlapBuffer);
+	}
+	
+
+	// °üº¬¹ØÏµµÄÅö×²¼ì²â
+	PxOverlapBuffer hitInOutOverlap;
+	if (false && gStaticOut)
+	{
+		PxTransform tIn = gStaticIn->getGlobalPose();
+		int nShapes = gStaticIn->getNbShapes();
+		PxShape* shapes[1];
+		gStaticIn->getShapes(shapes, nShapes);
+		PxGeometryHolder hIn = shapes[0]->getGeometry();
+
+		status = gScene->overlap(hIn.any(), tIn, hitInOutOverlap);
+
+		PxTransform tOut = gStaticOut->getGlobalPose();
+		nShapes = gStaticOut->getNbShapes();
+		PxShape* shapesOut[1];
+		gStaticOut->getShapes(shapesOut, nShapes);
+		PxGeometryHolder hOut = shapesOut[0]->getGeometry();
+
+		bool bIsOverlaping = physx::PxGeometryQuery::overlap(hIn.any(), tIn, hOut.any(), tOut);
+		if (bIsOverlaping)
+		{
+		}
+	}
+	
+	
+
+	
+
+	//status = gScene->overlap(hIn.any(), tIn, hitInOutOverlap);
+	//status = gScene->overlap(hOut.any(), tOut, hitInOutOverlap);
+
+	//PxSweepBuffer hitInSweep;
+	//status = gScene->sweep(hIn.any(), tIn, unitDir, PxReal(0.0f), hitInSweep, hitFlags, filterData);
+
+	
+	// add forceµÄÒ»Ð©²âÊÔ
+	if (true ) {
+		PxU32 nbActors = gScene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC);
+		if (nbActors > 0)
+		{
+			std::vector<PxActor*> actors(nbActors);
+			gScene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC, &actors[0], nbActors);
+			PxVec3 v3Force(1000.f, 0.f, 0.f);
+			for (PxU32 i = 0; i < 1/*nbActors*/; i++)
+			{
+				
+				//actors[i]->is<PxRigidBody>()->addForce(v3Force, PxForceMode::eFORCE);				// PxVec3 v3Force(1000000.f.f, 0.f, 0.f);
+				//actors[i]->is<PxRigidBody>()->addForce(v3Force, PxForceMode::eIMPULSE);			// PxVec3 v3Force(10000.f, 0.f, 0.f);
+				//actors[i]->is<PxRigidBody>()->addForce(v3Force, PxForceMode::eVELOCITY_CHANGE);	// PxVec3 v3Force(100.f, 0.f, 0.f);
+				actors[i]->is<PxRigidBody>()->addForce(v3Force, PxForceMode::eACCELERATION);		// PxVec3 v3Force(1000.f, 0.f, 0.f);
+				printf("mass-----[%f]-[%f]\n", actors[i]->is<PxRigidBody>()->getInvMass(), actors[i]->is<PxRigidBody>()->getMass());
+			}
+		}
+	}
+	}
 	// test
 
 	return dynamic;
@@ -155,6 +285,24 @@ void movePlane(PxRigidDynamic* body, const PxVec3 speed)
 	t = body->getGlobalPose();
 	//t.p += speed;
 	//body->setGlobalPose(t);
+}
+
+PxRigidStatic* createStaticStack(const PxTransform& t, PxReal halfExtent)
+{
+	PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
+	/*for (PxU32 i = 0; i < size; i++)
+	{
+		for (PxU32 j = 0; j < size - i; j++)
+		{*/
+			PxRigidStatic* body = gPhysics->createRigidStatic(t);
+			body->attachShape(*shape);
+			//PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+			gScene->addActor(*body);
+	//	}
+	//}
+	shape->release();
+
+	return body;
 }
 
 void createStack(const PxTransform& t, PxU32 size, PxReal halfExtent, PxReal density = 1.0f)
@@ -224,6 +372,8 @@ void initPhysics(bool interactive)
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
 	gMaterial = gPhysics->createMaterial(1.0f, 1.0f, .0f);
+	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	//gMaterial = gPhysics->createMaterial(0.f, 0.f, 0.6f);
 
 	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
@@ -236,6 +386,16 @@ void initPhysics(bool interactive)
 
 	for(PxU32 i=0;i<3;i++)
 		createStack(PxTransform(PxVec3(0, fStartHeight, stackZ-=10.0f)), 10, 2.0f);
+/*for(PxU32 i=0;i<1;i++)
+		createStack(PxTransform(PxVec3(0,0,stackZ-=10.0f)), 10, 2.0f);*/
+	for (PxU32 i = 0; i < 1; i++)
+		createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 1, 2.0f);
+
+	gStaticOut = createStaticStack(PxTransform(PxVec3(-10.f, 10, stackZ = 10.0f)), 6.0f);
+	//gStaticIn = createStaticStack(PxTransform(PxVec3(0, 10, stackZ = 10.0f)), 3.0f);
+	
+	//gStaticIn = createStaticStack(PxTransform(PxVec3(0, 13, stackZ = 12.0f)), 6.0f);
+	//gStaticIn = createStaticStack(PxTransform(PxVec3(0, 10, stackZ = 20.0f)), 3.0f);
 
 	if(!interactive)
 		createDynamic(PxTransform(PxVec3(0,40,100)), PxSphereGeometry(10), PxVec3(0,-50,-100));
